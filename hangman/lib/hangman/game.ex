@@ -2,7 +2,7 @@ defmodule Hangman.Game do
 
   defstruct(
     turns_left: 7,
-    state: :initializing,
+    state:      :initializing,
     letters:    [],
     guessed:    MapSet.new()
   )
@@ -12,52 +12,6 @@ defmodule Hangman.Game do
     %Hangman.Game{
       letters: String.codepoints(word)
     }
-  end
-
-  def make_move(game = %{state: state}, _guess)
-  when state in [:win, :lose] do
-    game
-  end
-
-  def make_move(game, guess) do
-    if   MapSet.member?(game.guessed, guess)
-    do   make_repeat_move(game)
-    else make_original_move(game, guess)
-    end
-  end
-
-  defp make_repeat_move(game) do
-    %{ game | state: :already_guessed }
-  end
-
-  defp make_original_move(game, guess) do
-    game = %{ game | guessed: MapSet.put(game.guessed, guess) }
-
-    if Enum.member?(game.letters, guess)
-    do make_good_guess(game)
-    else make_bad_guess(game)
-    end
-  end
-
-  defp make_good_guess(game) do
-    if MapSet.new(game.letters)
-       |> MapSet.subset?(game.guessed)
-    do %{ game | state: :win }
-    else %{ game | state: :good_guess }
-    end
-  end
-
-  defp make_bad_guess(game = %{ turns_left: 1 }) do
-    %{ game |
-      state: :lose,
-      turns_left: 0
-    }
-  end
-  defp make_bad_guess(game = %{ turns_left: turns }) do
-    %{ game |
-      state: :bad_guess,
-      turns_left: turns - 1
-     }
   end
 
   def tally(game) do
@@ -73,5 +27,69 @@ defmodule Hangman.Game do
     do letter
     else "_"
     end
+  end
+
+  def make_move(game = %{state: state}, _guess)
+  when state in [:win, :lose] do
+    game
+  end
+
+  def make_move(game, guess) do
+    cond do
+      # order matters
+      erroneous_move?(game, guess) -> erroneous_move(game, guess)
+      winning_move?(game, guess)   -> win(game, guess)
+      losing_move?(game, guess)    -> lose(game, guess)
+      good_move?(game, guess)      -> good_play(game, guess)
+      bad_move?(game, guess)       -> bad_play(game, guess)
+    end
+  end
+
+  defp erroneous_move?(game, guess), do: MapSet.member?(game.guessed, guess)
+  defp winning_move?(game, guess) do
+    good_move?(game, guess) &&
+      game.letters
+        |> MapSet.new()
+        |> MapSet.subset?(MapSet.put(game.guessed, guess))
+  end
+  defp losing_move?(game, guess) do
+    bad_move?(game, guess) &&
+      game.turns_left == 1
+  end
+  defp good_move?(game, guess), do: Enum.member?(game.letters, guess)
+  defp bad_move?(game, guess), do: !good_move?(game, guess)
+
+  defp erroneous_move(game, guess) do
+    %{ game | state: :already_guessed }
+  end
+
+  defp win(game, guess) do
+    %{ game |
+      state: :win,
+      guessed: MapSet.put(game.guessed, guess)
+    }
+  end
+
+  defp lose(game, guess) do
+    %{ game |
+      state: :lose,
+      guessed: MapSet.put(game.guessed, guess),
+      turns_left: 0
+    }
+  end
+
+  defp good_play(game, guess) do
+    %{ game |
+      state: :good_guess,
+      guessed: MapSet.put(game.guessed, guess),
+    }
+  end
+
+  defp bad_play(game, guess) do
+    %{ game |
+      state: :bad_guess,
+      guessed: MapSet.put(game.guessed, guess),
+      turns_left: game.turns_left - 1
+    }
   end
 end
