@@ -2,7 +2,7 @@ defmodule Hangman.Game do
 
   defstruct(
     turns_left: 7,
-    game_state: :initializing,
+    state: :initializing,
     letters:    [],
     guessed:    MapSet.new()
   )
@@ -14,7 +14,7 @@ defmodule Hangman.Game do
     }
   end
 
-  def make_move(game = %{game_state: state}, _guess)
+  def make_move(game = %{state: state}, _guess)
   when state in [:win, :lose] do
     game
   end
@@ -27,7 +27,7 @@ defmodule Hangman.Game do
   end
 
   defp make_repeat_move(game) do
-    %{ game | game_state: :already_guessed }
+    %{ game | state: :already_guessed }
   end
 
   defp make_original_move(game, guess) do
@@ -42,27 +42,27 @@ defmodule Hangman.Game do
   defp make_good_guess(game) do
     if MapSet.new(game.letters)
        |> MapSet.subset?(game.guessed)
-    do %{ game | game_state: :win }
-    else %{ game | game_state: :good_guess }
+    do %{ game | state: :win }
+    else %{ game | state: :good_guess }
     end
   end
 
   defp make_bad_guess(game = %{ turns_left: 1 }) do
     %{ game |
-      game_state: :lose,
+      state: :lose,
       turns_left: 0
     }
   end
   defp make_bad_guess(game = %{ turns_left: turns }) do
     %{ game |
-      game_state: :bad_guess,
+      state: :bad_guess,
       turns_left: turns - 1
      }
   end
 
   def tally(game) do
     %{
-      game_state: game.game_state,
+      state: game.state,
       turns_left: game.turns_left,
       letters: Enum.map(game.letters, fn x -> reveal(x, game.guessed) end)
     }
