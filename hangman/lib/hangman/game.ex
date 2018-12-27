@@ -36,7 +36,7 @@ defmodule Hangman.Game do
 
   def make_move(game, guess) do
     cond do
-      # order matters
+      # order matters; e.g. winning move is a type of good move!
       erroneous_move?(game, guess) -> erroneous_move(game, guess)
       winning_move?(game, guess)   -> win(game, guess)
       losing_move?(game, guess)    -> lose(game, guess)
@@ -59,7 +59,7 @@ defmodule Hangman.Game do
   defp good_move?(game, guess), do: Enum.member?(game.letters, guess)
   defp bad_move?(game, guess), do: !good_move?(game, guess)
 
-  defp erroneous_move(game, guess) do
+  defp erroneous_move(game, _guess) do
     %{ game | state: :already_guessed }
   end
 
@@ -80,14 +80,14 @@ defmodule Hangman.Game do
 
   defp good_play(game, guess) do
     %{ game |
-      state: :good_guess,
+      state: :good_play,
       guessed: MapSet.put(game.guessed, guess),
     }
   end
 
   defp bad_play(game, guess) do
     %{ game |
-      state: :bad_guess,
+      state: :bad_play,
       guessed: MapSet.put(game.guessed, guess),
       turns_left: game.turns_left - 1
     }

@@ -48,7 +48,7 @@ defmodule HangmanTest do
     { game, _tally } =
       Hangman.new_game("word")
       |> Hangman.make_move("w")
-    assert %{ state: :good_guess } = game
+    assert %{ state: :good_play } = game
   end
 
   test "a winning guess is recongized" do
@@ -62,7 +62,7 @@ defmodule HangmanTest do
     { game, _tally } = Hangman.new_game("a")
     |> Hangman.make_move("b")
 
-    assert %{ state: :bad_guess } = game
+    assert %{ state: :bad_play } = game
   end
 
   test "a bad guess decrements remaining turns" do
