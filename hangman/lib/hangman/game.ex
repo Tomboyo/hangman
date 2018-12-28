@@ -18,6 +18,7 @@ defmodule Hangman.Game do
     %{
       state: game.state,
       turns_left: game.turns_left,
+      guessed: MapSet.to_list(game.guessed),
       letters: Enum.map(game.letters, fn x -> reveal(x, game.guessed) end)
     }
   end
