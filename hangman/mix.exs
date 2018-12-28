@@ -7,7 +7,7 @@ defmodule Hangman.MixProject do
       version: "0.1.0",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
-      deps: dependencies()
+      deps: deps()
     ]
   end
 
@@ -17,7 +17,7 @@ defmodule Hangman.MixProject do
     ]
   end
 
-  defp dependencies do
+  defp deps do
     [
       { :dictionary, path: "../dictionary" }
     ]
