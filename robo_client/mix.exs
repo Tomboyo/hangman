@@ -1,9 +1,9 @@
-defmodule TextClient.MixProject do
+defmodule RoboClient.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :text_client,
+      app: :robo_client,
       version: "0.1.0",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
@@ -17,7 +17,8 @@ defmodule TextClient.MixProject do
 
   defp deps do
     [
-      { :hangman, path: "../hangman" }
+      { :hangman,     path: "../hangman" },
+      { :text_client, path: "../text_client" }
     ]
   end
 end
