@@ -1,4 +1,4 @@
-defmodule Textclient.MixProject do
+defmodule TextClient.MixProject do
   use Mix.Project
 
   def project do
@@ -16,6 +16,8 @@ defmodule Textclient.MixProject do
   end
 
   defp deps do
-    [ ]
+    [
+      { :hangman, path: "../hangman" }
+    ]
   end
 end
