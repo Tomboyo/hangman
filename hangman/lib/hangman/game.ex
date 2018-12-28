@@ -7,7 +7,12 @@ defmodule Hangman.Game do
     guessed:    MapSet.new()
   )
 
-  def new_game(), do: new_game(Dictionary.random_word)
+  def new_game() do
+    Dictionary.start()
+    |> Dictionary.random_word()
+    |> new_game()
+  end
+
   def new_game(word) do
     %Hangman.Game{
       letters: String.codepoints(word)
