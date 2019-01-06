@@ -1,9 +1,16 @@
 defmodule Dictionary.WordList do
 
-  @process_name __MODULE__
+  @name __MODULE__
 
-  def start_link() do
-    Agent.start_link(&word_list/0, name: @process_name)
+  def child_spec(args) do
+    %{
+      id: Keyword.get(args, :name, @name),
+      start: { __MODULE__, :start_link, args }
+    }
+  end
+
+  def start_link(args \\ []) do
+    Agent.start_link(&word_list/0, name: Keyword.get(args, :name, @name))
   end
 
   defp word_list() do
@@ -13,8 +20,8 @@ defmodule Dictionary.WordList do
     |> String.split(~r/\n/)
   end
 
-  def random_word() do
-    Agent.get(@process_name, &Enum.random/1)
+  def random_word(name \\ @name) do
+    Agent.get(name, &Enum.random/1)
   end
 
 end
