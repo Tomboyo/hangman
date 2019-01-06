@@ -12,7 +12,9 @@ defmodule Dictionary.MixProject do
   end
 
   def application do
-    [ ]
+    [
+      mod: { Dictionary.Application, [] }
+    ]
   end
 
   defp deps do
