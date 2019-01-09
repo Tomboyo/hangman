@@ -7,40 +7,44 @@ defmodule Hangman.Game do
     guessed:    MapSet.new()
   )
 
-  def new_game() do
-    Dictionary.random_word()
-    |> new_game()
-  end
-
   def new_game(word) do
     %Hangman.Game{
       letters: String.codepoints(word)
     }
   end
 
-  def make_move(game, guess) do
-    advance_state(game, guess)
-    |> update_guessed(guess)
-    |> add_tally()
+  def make_move(game = %{ state: state }, _guess)
+  when state in [ :win, :lose ] do
+    add_tally(game)
   end
 
-  defp advance_state(game = %{state: state}, _guess)
-  when state in [:win, :lose] do
-    game
+  def make_move(game, guess) do
+    if already_guessed?(game, guess) do
+      already_guessed(game)
+    else
+      advance_state(game, guess)
+    end
+      |> add_tally()
+  end
+
+  defp already_guessed?(game, guess) do
+    MapSet.member?(game.guessed, guess)
+  end
+
+  defp already_guessed(game) do
+    %{ game | state: :already_guessed }
   end
 
   defp advance_state(game, guess) do
     cond do
       # order matters; e.g. winning move is a type of good move!
-      erroneous_play?(game, guess) -> erroneous_play(game, guess)
       winning_play?(game, guess)   -> win(game, guess)
       losing_play?(game, guess)    -> lose(game, guess)
       good_play?(game, guess)      -> good_play(game, guess)
       bad_play?(game, guess)       -> bad_play(game, guess)
     end
+      |> update_guessed(guess)
   end
-
-  defp erroneous_play?(game, guess), do: MapSet.member?(game.guessed, guess)
 
   defp winning_play?(game, guess) do
     good_play?(game, guess) &&
@@ -57,10 +61,6 @@ defmodule Hangman.Game do
   defp good_play?(game, guess), do: Enum.member?(game.letters, guess)
 
   defp bad_play?(game, guess), do: !good_play?(game, guess)
-
-  defp erroneous_play(game, _guess) do
-    %{ game | state: :already_guessed }
-  end
 
   defp win(game, _guess) do
     %{ game | state: :win }
@@ -81,23 +81,37 @@ defmodule Hangman.Game do
     }
   end
 
-  defp update_guessed(game, guess) do
+  defp update_guessed(game = %{ state: state }, guess)
+  when state != :already_guessed do
     Map.update!(game, :guessed, fn guessed ->
       MapSet.put(guessed, guess) end
     )
+  end
+
+  defp update_guessed(game, _guess) do
+    game
   end
 
   defp add_tally(game) do
     { game, tally(game) }
   end
 
-  defp tally(game) do
+  def tally(game) do
     %{
       state: game.state,
       turns_left: game.turns_left,
       guessed: MapSet.to_list(game.guessed),
-      letters: Enum.map(game.letters, fn x -> reveal(x, game.guessed) end)
+      letters: reveal_letters(game)
     }
+  end
+
+  defp reveal_letters(game = %{ state: state })
+  when state == :lose do
+    game.letters
+  end
+
+  defp reveal_letters(%{ letters: letters, guessed: guessed }) do
+    Enum.map(letters, fn letter -> reveal(letter, guessed) end)
   end
 
   defp reveal(letter, guessed) do
