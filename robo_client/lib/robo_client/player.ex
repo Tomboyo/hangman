@@ -3,11 +3,13 @@ defmodule RoboClient.Player do
   alias TextClient.Summary
   alias RoboClient.{ Guesser, Mover, State }
 
-  def play(%State{ tally: %{ state: :win }}) do
+  def play(game = %State{ tally: %{ state: :win }}) do
+    Summary.display(game)
     exit_with_message("THE MACHINE IS VICTORIOUS.")
   end
 
-  def play(%State{ tally: %{ state: :lose }}) do
+  def play(game = %State{ tally: %{ state: :lose }}) do
+    Summary.display(game)
     exit_with_message("THE GAME IS RIGGED.")
   end
 
