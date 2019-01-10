@@ -3,10 +3,12 @@ defmodule Hangman.Server do
   use GenServer
   alias Hangman.Game
 
+  @spec start_link(keyword) :: GenServer.on_start
   def start_link(args) do
     GenServer.start_link(__MODULE__, args)
   end
 
+  @spec init(keyword) :: { :ok, Game.t }
   def init(args) do
     args
     |> Keyword.get_lazy(:word, &Dictionary.random_word/0)

@@ -1,5 +1,27 @@
 defmodule Hangman.Game do
 
+  @type state ::
+      :initializing
+    | :win
+    | :lose
+    | :good_guess
+    | :bad_guess
+    | :already_guessed
+
+  @opaque t :: %__MODULE__{
+    turns_left: integer,
+    state:      state,
+    letters:    [ String.t ],
+    guessed:    MapSet.t(String.t)
+  }
+
+  @type tally :: %{
+    turns_left: integer,
+    state:      state,
+    letters:    [ String.t ],
+    guessed:    [ String.t ]
+  }
+
   defstruct(
     turns_left: 7,
     state:      :initializing,
@@ -7,11 +29,15 @@ defmodule Hangman.Game do
     guessed:    MapSet.new()
   )
 
+  @spec new_game(String.t) :: t
   def new_game(word) do
     %Hangman.Game{
       letters: String.codepoints(word)
     }
   end
+
+  @spec make_move(t, String.t) :: { t, tally }
+  def make_move(game, guess)
 
   def make_move(game = %{ state: state }, _guess)
   when state in [ :win, :lose ] do
@@ -38,29 +64,29 @@ defmodule Hangman.Game do
   defp advance_state(game, guess) do
     cond do
       # order matters; e.g. winning move is a type of good move!
-      winning_play?(game, guess)   -> win(game, guess)
-      losing_play?(game, guess)    -> lose(game, guess)
-      good_play?(game, guess)      -> good_play(game, guess)
-      bad_play?(game, guess)       -> bad_play(game, guess)
+      winning_guess?(game, guess)   -> win(game, guess)
+      losing_guess?(game, guess)    -> lose(game, guess)
+      good_guess?(game, guess)      -> good_guess(game, guess)
+      bad_guess?(game, guess)       -> bad_guess(game, guess)
     end
       |> update_guessed(guess)
   end
 
-  defp winning_play?(game, guess) do
-    good_play?(game, guess) &&
+  defp winning_guess?(game, guess) do
+    good_guess?(game, guess) &&
       game.letters
         |> MapSet.new()
         |> MapSet.subset?(MapSet.put(game.guessed, guess))
   end
 
-  defp losing_play?(game, guess) do
-    bad_play?(game, guess) &&
+  defp losing_guess?(game, guess) do
+    bad_guess?(game, guess) &&
       game.turns_left == 1
   end
 
-  defp good_play?(game, guess), do: Enum.member?(game.letters, guess)
+  defp good_guess?(game, guess), do: Enum.member?(game.letters, guess)
 
-  defp bad_play?(game, guess), do: !good_play?(game, guess)
+  defp bad_guess?(game, guess), do: !good_guess?(game, guess)
 
   defp win(game, _guess) do
     %{ game | state: :win }
@@ -70,13 +96,13 @@ defmodule Hangman.Game do
     %{ game | state: :lose, turns_left: 0 }
   end
 
-  defp good_play(game, _guess) do
-    %{ game | state: :good_play }
+  defp good_guess(game, _guess) do
+    %{ game | state: :good_guess }
   end
 
-  defp bad_play(game, _guess) do
+  defp bad_guess(game, _guess) do
     %{ game |
-      state: :bad_play,
+      state: :bad_guess,
       turns_left: game.turns_left - 1
     }
   end
@@ -96,6 +122,7 @@ defmodule Hangman.Game do
     { game, tally(game) }
   end
 
+  @spec tally(t) :: tally
   def tally(game) do
     %{
       state: game.state,

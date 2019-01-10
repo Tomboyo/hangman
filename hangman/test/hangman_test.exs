@@ -50,16 +50,16 @@ defmodule HangmanTest do
       assert tally.guessed == [ "x" ]
     end
 
-    test "a :good_play is recognized", %{ server: server } do
+    test "a :good_guess is recognized", %{ server: server } do
       tally = Hangman.make_move(server, "w")
 
-      assert tally.state == :good_play
+      assert tally.state == :good_guess
     end
 
-    test "a :bad_play is recognized", %{ server: server } do
+    test "a :bad_guess is recognized", %{ server: server } do
       tally = Hangman.make_move(server, "x")
 
-      assert tally.state == :bad_play
+      assert tally.state == :bad_guess
     end
 
     test "a :win is recognized", %{ server: server } do

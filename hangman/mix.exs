@@ -19,7 +19,8 @@ defmodule Hangman.MixProject do
 
   defp deps do
     [
-      { :dictionary, path: "../dictionary" }
+      { :dictionary, path: "../dictionary" },
+      { :dialyxir, "~> 0.5", only: [:dev], runtime: false }
     ]
   end
 end
