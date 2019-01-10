@@ -14,7 +14,7 @@ defmodule RoboClient.Player do
   end
 
   def play(game = %State{ tally: %{ state: state }})
-  when state in [:initializing, :good_play, :bad_play, :already_guessed] do
+  when state in [:initializing, :good_guess, :bad_guess, :already_guessed] do
     game
     |> Summary.display()
     |> Guesser.make_guess()

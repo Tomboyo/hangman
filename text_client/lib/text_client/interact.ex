@@ -3,7 +3,8 @@ defmodule TextClient.Interact do
   alias TextClient.{ State, Player }
 
   def start() do
-    Hangman.new_game()
+    { :ok, server } = Hangman.new_game()
+    server
     |> State.new
     |> Player.play()
   end
