@@ -4,7 +4,7 @@ defmodule Hangman do
   alias Hangman.Game
 
   def new_game() do
-    Server.start_link([])
+    Supervisor.start_child(Hangman.Supervisor, [])
   end
 
   @spec new_game(keyword) :: GenServer.on_start
