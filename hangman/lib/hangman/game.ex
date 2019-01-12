@@ -45,31 +45,24 @@ defmodule Hangman.Game do
   end
 
   def make_move(game, guess) do
-    if already_guessed?(game, guess) do
-      already_guessed(game)
-    else
-      advance_state(game, guess)
-    end
+    advance_state(game, guess)
+      |> update_guessed(guess)
       |> add_tally()
-  end
-
-  defp already_guessed?(game, guess) do
-    MapSet.member?(game.guessed, guess)
-  end
-
-  defp already_guessed(game) do
-    %{ game | state: :already_guessed }
   end
 
   defp advance_state(game, guess) do
     cond do
       # order matters; e.g. winning move is a type of good move!
+      already_guessed?(game, guess) -> already_guessed(game)
       winning_guess?(game, guess)   -> win(game, guess)
       losing_guess?(game, guess)    -> lose(game, guess)
       good_guess?(game, guess)      -> good_guess(game, guess)
       bad_guess?(game, guess)       -> bad_guess(game, guess)
     end
-      |> update_guessed(guess)
+  end
+
+  defp already_guessed?(game, guess) do
+    MapSet.member?(game.guessed, guess)
   end
 
   defp winning_guess?(game, guess) do
@@ -87,6 +80,10 @@ defmodule Hangman.Game do
   defp good_guess?(game, guess), do: Enum.member?(game.letters, guess)
 
   defp bad_guess?(game, guess), do: !good_guess?(game, guess)
+
+  defp already_guessed(game) do
+    %{ game | state: :already_guessed }
+  end
 
   defp win(game, _guess) do
     %{ game | state: :win }
