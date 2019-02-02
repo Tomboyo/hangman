@@ -3,9 +3,9 @@ defmodule Hangman.Application do
 
   def start(_type, _args) do
     Supervisor.start_link(
-      [ Hangman.Server ],
+      [ Hangman.DynamicSupervisor ],
       name: Hangman.Supervisor,
-      strategy: :simple_one_for_one
+      strategy: :one_for_one
     )
   end
 

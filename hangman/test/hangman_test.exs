@@ -6,6 +6,12 @@ defmodule HangmanTest do
     assert is_pid(server)
   end
 
+  test "'Hangman.new_game accepts a secret word" do
+    { :ok, server } = Hangman.new_game(word: "a")
+    tally = Hangman.make_move(server, "a")
+    assert tally.state == :win
+  end
+
   describe "A new game tally" do
     setup do
       { :ok, server } = Hangman.new_game(word: "word")
